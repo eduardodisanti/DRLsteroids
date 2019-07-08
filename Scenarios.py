@@ -22,6 +22,14 @@ class Scenario:
         self.bang = False
         self.score = 0
 
+    def step(self, action):
+
+        s, x, y = self.ship
+        x+=action
+        self.ship = (s,x,y)
+        self.put_ship(self.ship)
+        self.move_down_scenario(1)
+
     def print_scenario(self):
         for j in range(self.height):
             for i in range(self.width):
@@ -68,12 +76,15 @@ class Scenario:
         y = int(self.ship[2] - 1)
         x = int(self.ship[1] - 1)
 
-        next_1 = self.board[y][x]
-
         if x < 0:
             x = 0
         if y < 0:
             y = 0
+        if x >= self.width - 1:
+            x = self.width - 1
+
+
+        next_1 = self.board[y][x]
         self.board[y][x] = -1
 
         next = self.board[y - 1][x]
