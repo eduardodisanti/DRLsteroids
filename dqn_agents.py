@@ -3,6 +3,7 @@ import random
 from collections import namedtuple, deque
 
 from Models import DQN_Agent
+from auxs import flatten_tensor
 
 import torch
 import torch.nn.functional as F
@@ -14,7 +15,7 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 class Agent():
     """Interacts with and learns from the environment."""
 
-    def __init__(self, shape, x, y, state_size=37, action_size=4, seed=44, gamma=0.99, buffer_size=64, batch_size=100, tau=0.001,
+    def __init__(self, ship, state_size=400, action_size=3, seed=44, gamma=0.99, buffer_size=64, batch_size=100, tau=0.001,
                  lr=0.005, update_every=4):
         """Initialize an Agent object.
 
@@ -47,6 +48,7 @@ class Agent():
         self.t_step = 0
 
         # GAME DATA
+        (shape, x, y) = ship
         self.shape = shape
         self.x = x
         self.y = y
@@ -54,7 +56,7 @@ class Agent():
 
     def step(self, state, action, reward, next_state, done):
         # Save experience in replay memory
-        self.memory.add(state, action, reward, next_state, done)
+        self.memory.add(state, action, reward, next_state, done, self.state_size)
 
         # Learn every UPDATE_EVERY time steps.
         self.t_step = (self.t_step + 1) % self.UPDATE_EVERY
@@ -72,6 +74,8 @@ class Agent():
             state (array_like): current state
             eps (float): epsilon, for epsilon-greedy action selection
         """
+        state = np.array(state)
+        state = state.reshape(1, self.state_size)
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
         self.qnetwork_local.eval()
         with torch.no_grad():
@@ -148,8 +152,11 @@ class ReplayBuffer:
         self.experience = namedtuple("Experience", field_names=["state", "action", "reward", "next_state", "done"])
         self.seed = random.seed(seed)
 
-    def add(self, state, action, reward, next_state, done):
+    def add(self, state, action, reward, next_state, done, state_size):
         """Add a new experience to memory."""
+
+        state      = flatten_tensor(state, state_size)
+        next_state = flatten_tensor(next_state, state_size)
         e = self.experience(state, action, reward, next_state, done)
         self.memory.append(e)
 
@@ -162,8 +169,7 @@ class ReplayBuffer:
         rewards = torch.from_numpy(np.vstack([e.reward for e in experiences if e is not None])).float().to(device)
         next_states = torch.from_numpy(np.vstack([e.next_state for e in experiences if e is not None])).float().to(
             device)
-        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(
-            device)
+        dones = torch.from_numpy(np.vstack([e.done for e in experiences if e is not None]).astype(np.uint8)).float().to(device)
 
         return (states, actions, rewards, next_states, dones)
 
