@@ -1,5 +1,5 @@
 import random
-import time
+import numpy as np
 
 
 THE_MARK = "*"
@@ -21,6 +21,14 @@ class Scenario:
         self.ship_shape, _, _ = ship
         self.bang = False
         self.score = 0
+
+    def create_state(self, state):
+        state = np.array(state)
+        ss = state.shape[0] *state.shape[1]
+        state = state.reshape(1, ss)
+        state = np.append(state, self.ship[1])
+
+        return state
 
     def step(self, action):
 
@@ -64,7 +72,7 @@ class Scenario:
         self.create_new_line(index - 1)
 
         pts = sum(self.board[self.height - 1])
-        self.score += pts
+        self.score += 1
 
     def get_object_on(self, x, y):
 
@@ -92,7 +100,7 @@ class Scenario:
         self.bang = next != 0 or next_1 != 0
 
         if self.bang:
-            self.score += 10
+            self.score -= 1
 
         return self.bang
 

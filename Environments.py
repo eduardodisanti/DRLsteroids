@@ -22,11 +22,11 @@ class Environment:
         self.steps+=1
 
         self.scenario.step(action)
-        self.done = self.steps > self.max or self.scenario.bang
+        self.done = self.steps > self.max #or self.scenario.bang
 
         if self.scenario.bang:
             reward = -1
         else:
-            reward =  0
+            reward =  self.scenario.score
 
         return self.scenario.board, reward, self.done, self.steps
