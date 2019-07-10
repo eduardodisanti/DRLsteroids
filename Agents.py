@@ -28,6 +28,7 @@ class SARSAAgent:
         Params
         ======
         - state: the current state of the environment
+        - state: the current state of thdqne environment
 
         Returns
         =======

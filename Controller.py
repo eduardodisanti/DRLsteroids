@@ -56,7 +56,6 @@ class Controller:
                     self.agent.x = self.scenario.width
 
                 next_state, reward, done, _ = self.environment.step(action)
-                rewards.append(reward)
                 # agent performs internal updates based on sampled experience
                 if not done:
                     next_state = self.scenario.create_state(next_state)
@@ -75,8 +74,10 @@ class Controller:
             if self.max_score < self.scenario.score:
                 self.max_score = self.scenario.score
             self.scenario.score = 0
+            plt.plot(scores, ".", color="b", label="Score")
+            plt.plot(rewards, "x", color="g", label="Rewards")
+            plt.pause(0.001)
 
-        plt.plot(scores, ".", label="Score")
         #plt.plot(rewards, label="Reward")
         plt.show()
         print(actions_dist)
@@ -92,7 +93,7 @@ LR = 5e-4               # learning rate
 UPDATE_EVERY = 4        # how often to update the network
 action_size = 3         # -1 LEFT, 0 STAY, 1 RIGTH
 
-s = Scenario((SHAPE_1, 10, 10), size=(20, 20), density=9)
+s = Scenario((SHAPE_1, 10, 10), size=(20, 20), density=5)
 
 state_size = s.width * s.height + 1
 a = Agent((SHAPE_1, 10, 20), state_size=state_size, action_size=action_size, seed=0, gamma=GAMMA, buffer_size=BUFFER_SIZE, batch_size=BATCH_SIZE, tau=TAU, lr=LR, update_every=UPDATE_EVERY)

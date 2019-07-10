@@ -27,6 +27,6 @@ class Environment:
         if self.scenario.bang:
             reward = -1
         else:
-            reward =  self.scenario.score
+            reward =  1
 
         return self.scenario.board, reward, self.done, self.steps

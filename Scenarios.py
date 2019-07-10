@@ -85,12 +85,12 @@ class Scenario:
             self.board[index] = self.board[index - 1]
         self.create_new_line(index - 1)
 
-        pts = sum(self.board[self.height - 1])
-        self.score += 1
         shape, x, y = self.get_ship()
         if self.board[y][x]>0:
             self.bang = True
-            self.score-=10
+            self.score-=1
+        else:
+            self.score += 1
 
         return self.bang
 
