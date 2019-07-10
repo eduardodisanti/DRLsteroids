@@ -36,7 +36,7 @@ class Scenario:
         x+=action
         self.ship = (s,x,y)
         self.put_ship(self.ship)
-        self.move_down_scenario(1)
+        self.bang = self.move_down_scenario(1)
 
     def print_scenario(self):
         for j in range(self.height):
@@ -66,23 +66,10 @@ class Scenario:
             self.board[index] = self.board[index + 1]
         self.create_new_line(index + 1)
 
-    def move_down_scenario(self, num_lines):
-        for index in range(self.height - 1, 1, -1):
-            self.board[index] = self.board[index - 1]
-        self.create_new_line(index - 1)
-
-        pts = sum(self.board[self.height - 1])
-        self.score += 1
-
-    def get_object_on(self, x, y):
-
-        return self.board[y][x]
-
-    def put_ship(self, ship):
-
-        self.ship = ship
-        y = int(self.ship[2] - 1)
+    def get_ship(self):
+        shape = self.ship[0]
         x = int(self.ship[1] - 1)
+        y = int(self.ship[2] - 1)
 
         if x < 0:
             x = 0
@@ -91,18 +78,37 @@ class Scenario:
         if x >= self.width - 1:
             x = self.width - 1
 
+        return (shape, x, y)
 
-        next_1 = self.board[y][x]
-        self.board[y][x] = -1
+    def move_down_scenario(self, num_lines):
+        for index in range(self.height - 1, 1, -1):
+            self.board[index] = self.board[index - 1]
+        self.create_new_line(index - 1)
 
-        next = self.board[y - 1][x]
-
-        self.bang = next != 0 or next_1 != 0
-
-        if self.bang:
-            self.score -= 1
+        pts = sum(self.board[self.height - 1])
+        self.score += 1
+        shape, x, y = self.get_ship()
+        if self.board[y][x]>0:
+            self.bang = True
+            self.score-=10
 
         return self.bang
+
+    def get_object_on(self, x, y):
+
+        return self.board[y][x]
+
+    def put_ship(self, ship):
+
+        shape, x, y = self.get_ship()
+
+        self.board[y][x] = 0
+
+        self.ship = ship
+        shape, x, y = self.get_ship()
+
+        self.board[y][x] = -1
+
 
 #s = Scenario(size=(40, 20), density=10)
 

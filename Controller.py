@@ -13,22 +13,22 @@ class Controller:
         self.scenario = scenario
         self.graphic_w = self.scenario.width
         self.graphic_h = self.scenario.height
-        self.speed = 0.1
+        self.speed = 0.25
         self.scene = scenario
         self.agent = agent
-        self.score = 0
         self.bangs = 0
         self.epsilon = eps
         self.eps_decay = eps_decay
         self.eps_min = eps_min
         self.episodes = 0
+        self.max_score = -999999
 
         self.environment = environment
         #self.ship = Ship()
 
     def draw_scenario(self):
         print("\033[H\033[J")
-        print("Score", self.score, "steps", self.environment.steps, "episodes", self.episodes)
+        print("Score", self.scenario.score, "steps", self.environment.steps, "episodes", self.episodes, "max", self.max_score)
         self.scenario.print_scenario()
 
     def game_loop(self, episodes=100, train=False):
@@ -40,10 +40,7 @@ class Controller:
             self.environment.reset(self.scenario)
             self.episodes = e
             while not self.environment.done:
-                bang = self.scenario.put_ship(self.agent.get_ship())
-                if bang:
-                    self.bangs += 1
-                    self.score -= 1
+                self.scenario.put_ship(self.agent.get_ship())
                 self.draw_scenario()
 
                 state = self.scenario.create_state(self.scenario.board)
@@ -71,10 +68,13 @@ class Controller:
                 #self.scenario.move_down_scenario(1)
             scores.append(self.scenario.score)
             self.environment.reset(s)
+
             self.epsilon*=self.eps_decay
             if self.epsilon < self.eps_min:
                 self.epsilon = self.eps_min
-            self.score = 0
+            if self.max_score < self.scenario.score:
+                self.max_score = self.scenario.score
+            self.scenario.score = 0
 
         plt.plot(scores, ".", label="Score")
         #plt.plot(rewards, label="Reward")
@@ -92,10 +92,10 @@ LR = 5e-4               # learning rate
 UPDATE_EVERY = 4        # how often to update the network
 action_size = 3         # -1 LEFT, 0 STAY, 1 RIGTH
 
-s = Scenario((SHAPE_1, 10, 10), size=(20, 20), density=2)
+s = Scenario((SHAPE_1, 10, 10), size=(20, 20), density=9)
 
 state_size = s.width * s.height + 1
 a = Agent((SHAPE_1, 10, 20), state_size=state_size, action_size=action_size, seed=0, gamma=GAMMA, buffer_size=BUFFER_SIZE, batch_size=BATCH_SIZE, tau=TAU, lr=LR, update_every=UPDATE_EVERY)
 e = Environment(s, max=1000)
 c = Controller(s, e, a)
-c.game_loop(episodes=10000, train=True)
+c.game_loop(episodes=1000, train=True)
