@@ -17,9 +17,9 @@ class DQN_Agent(nn.Module):
         self.seed = torch.manual_seed(seed)
         self.fc1 = nn.Linear(state_size, fc1_neurons)
         self.fc2 = nn.Linear(fc1_neurons, fc2_neurons)
-        self.fc3 = nn.Linear(fc2_neurons, 200)
-        self.fc4 = nn.Linear(200, 100)
-        self.fc5 = nn.Linear(100, 50)
+        self.fc3 = nn.Linear(fc2_neurons, 800)
+        self.fc4 = nn.Linear(800, 200)
+        self.fc5 = nn.Linear(200, 50)
         self.fcD = nn.Linear(50, action_size)
 
     def forward(self, state):
@@ -30,3 +30,4 @@ class DQN_Agent(nn.Module):
         x = F.relu(self.fc4(x))
         x = F.relu(self.fc5(x))
         return self.fcD(x)
+

@@ -21,6 +21,8 @@ class Scenario:
         self.ship_shape, _, _ = ship
         self.bang = False
         self.score = 0
+        self.steps = 0
+        self.done = False
 
     def create_state(self, state):
         state = np.array(state)
@@ -30,13 +32,27 @@ class Scenario:
 
         return state
 
+    def check_collition(self):
+        shape, x, y = self.get_ship()
+
+        collision = self.board[y][x]>0
+        return collision
+
     def step(self, action):
 
+        self.steps+=1
         s, x, y = self.ship
         x+=action
         self.ship = (s,x,y)
+        self.bang = self.check_collition()
+        if self.bang:
+            self.done = True
+
         self.put_ship(self.ship)
-        self.bang = self.move_down_scenario(1)
+        self.move_down_scenario(1)
+        if self.steps % self.height==0 and not self.bang:
+            self.score+=1
+
 
     def print_scenario(self):
         for j in range(self.height):
@@ -54,7 +70,7 @@ class Scenario:
     def create_new_line(self, i):
         self.board[i] = [0]*self.width
         for j in range(self.width):
-            if random.randint(0, 100) <= self.density:
+            if random.randint(0, 1000) <= self.density:
                 self.board[i][j] = 1
 
     def create_world(self):
@@ -84,15 +100,6 @@ class Scenario:
         for index in range(self.height - 1, 1, -1):
             self.board[index] = self.board[index - 1]
         self.create_new_line(index - 1)
-
-        shape, x, y = self.get_ship()
-        if self.board[y][x]>0:
-            self.bang = True
-            self.score-=1
-        else:
-            self.score += 1
-
-        return self.bang
 
     def get_object_on(self, x, y):
 
