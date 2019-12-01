@@ -6,7 +6,7 @@ THE_MARK = "*"
 BLANK    = " "
 class Scenario:
 
-    def __init__(self, ship, size=(64,64), density=10):
+    def __init__(self, ship, size=(64,64), density=50):
 
         w, h = size
         self.top = 0
@@ -14,15 +14,16 @@ class Scenario:
         self.width = w
         self.density = density
 
-        self.board = [[0]*(w) for i in range(h)]
-
         self.ship = ship
+        self.init_ship = ship
 
         self.ship_shape, _, _ = ship
         self.bang = False
         self.score = 0
         self.steps = 0
         self.done = False
+
+        self.reset()
 
     def create_state(self, state):
         state = np.array(state)
@@ -32,10 +33,14 @@ class Scenario:
 
         return state
 
+    def reset(self):
+        self.board = [[0]*(self.width) for i in range(self.height)]
+        self.ship = self.init_ship
+
     def check_collition(self):
         shape, x, y = self.get_ship()
 
-        collision = self.board[y][x]>0
+        collision = self.board[y][x]>0 or self.board[y-1][x]>0
         return collision
 
     def step(self, action):
@@ -52,7 +57,9 @@ class Scenario:
         self.move_down_scenario(1)
         if self.steps % self.height==0 and not self.bang:
             self.score+=1
-
+        else:
+            if self.bang :
+                self.score -= 1
 
     def print_scenario(self):
         for j in range(self.height):
